@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>График смен | Сотрудник</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0b2b3b 0%, #1c4e6e 100%);
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+
+        .app {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.96);
+            border-radius: 2rem;
+            box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .page {
+            padding: 2rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Логин */
+        .login-card {
+            max-width: 420px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+            .login-header h1 {
+                font-size: 1.8rem;
+                background: linear-gradient(135deg, #1c4e6e, #0b2b3b);
+                background-clip: text;
+                -webkit-background-clip: text;
+                color: transparent;
+            }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+            position: relative;
+        }
+
+            .input-group label {
+                display: block;
+                font-weight: 500;
+                margin-bottom: 0.5rem;
+                color: #1f2d3d;
+            }
+
+            .input-group input {
+                width: 100%;
+                padding: 0.8rem 1rem;
+                border: 1px solid #cbd5e1;
+                border-radius: 1rem;
+                font-size: 1rem;
+                background: #f8fafc;
+                transition: all 0.2s;
+            }
+
+                .input-group input:focus {
+                    outline: none;
+                    border-color: #1c4e6e;
+                    box-shadow: 0 0 0 3px rgba(28,78,110,0.2);
+                    background: white;
+                }
+
+        .password-toggle {
+            position: absolute;
+            right: 1rem;
+            bottom: 0.8rem;
+            cursor: pointer;
+            color: #6c757d;
+            user-select: none;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #e2e8f0;
+            color: #1f2d3d;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1c4e6e, #0b2b3b);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            }
+
+        .btn-sm {
+            padding: 0.4rem 1rem;
+            font-size: 0.8rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #cbd5e1;
+        }
+
+        .full-width {
+            width: 100%;
+        }
+
+        /* Дашборд */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .welcome h2 {
+            font-size: 1.3rem;
+            color: #0b2b3b;
+        }
+
+        .welcome p {
+            color: #475569;
+            font-size: 0.85rem;
+        }
+
+        .info-note {
+            background: #fef9c3;
+            border-left: 4px solid #eab308;
+            padding: 0.75rem;
+            border-radius: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            color: #854d0e;
+        }
+
+        .month-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+
+        .month-tab {
+            background: none;
+            border: none;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 2rem;
+            transition: all 0.2s;
+            color: #4b5563;
+        }
+
+            .month-tab.active {
+                background: #1c4e6e;
+                color: white;
+            }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .day-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            min-height: 85px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+            .day-card.disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                background: #f1f5f9;
+            }
+
+            .day-card.past {
+                background: #e2e8f0;
+                cursor: default;
+                opacity: 0.6;
+            }
+
+            .day-card.today {
+                border: 2px solid #f59e0b;
+                background: #fffbeb;
+            }
+
+            .day-card.free {
+                background: #e6f7e6;
+            }
+
+            .day-card.occupied {
+                background: #dbeafe;
+            }
+
+            .day-card.pending-add {
+                background: #c7d2fe;
+                border: 2px solid #4f46e5;
+            }
+
+            .day-card.pending-delete {
+                background: #fee2e2;
+                border: 2px solid #dc2626;
+                text-decoration: line-through;
+            }
+
+        .day-number {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .day-type {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 1rem;
+            background: #e2e8f0;
+            display: inline-block;
+            margin-top: 0.2rem;
+        }
+
+            .day-type.full {
+                background: #bbf7d0;
+                color: #166534;
+            }
+
+            .day-type.part {
+                background: #fed7aa;
+                color: #9a3412;
+            }
+
+        .day-time {
+            font-size: 0.65rem;
+            color: #334155;
+            margin-top: 0.2rem;
+        }
+
+        .save-bar {
+            position: sticky;
+            bottom: 1rem;
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .save-button {
+            background: #059669;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 3rem;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+            .save-button:disabled {
+                background: #9ca3af;
+                cursor: not-allowed;
+            }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            max-width: 400px;
+            width: 90%;
+        }
+
+            .modal-content select, .modal-content input {
+                width: 100%;
+                padding: 0.5rem;
+                margin: 0.5rem 0;
+                border-radius: 0.75rem;
+                border: 1px solid #cbd5e1;
+            }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: #1e293b;
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 2rem;
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            z-index: 1100;
+        }
+
+        .loader {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.6s linear infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .calendar-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .page {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Страница входа -->
+        <div id="loginPage" class="page">
+            <div class="login-card">
+                <div class="login-header">
+                    <h1>График смен</h1>
+                    <p>Вход для сотрудников</p>
+                </div>
+                <div class="input-group">
+                    <label>ID сотрудника</label>
+                    <input type="text" id="empId" placeholder="Введите ID" value="1001">
+                </div>
+                <div class="input-group">
+                    <label>Пароль</label>
+                    <input type="password" id="password" placeholder="Пароль">
+                    <span class="password-toggle" id="togglePassword">👁️</span>
+                </div>
+                <button class="btn btn-primary full-width" id="loginBtn">Войти</button>
+                <p style="text-align:center; font-size:0.7rem; margin-top:1rem; color:#94a3b8;">
+                    Тестовые пароли: для ID 1001,1002,1003 → admin
+                </p>
+            </div>
+        </div>
+
+        <!-- Дашборд сотрудника -->
+        <div id="dashboardPage" class="page hidden">
+            <div class="dashboard-header">
+                <div class="welcome">
+                    <h2>Здравствуйте, <span id="userName"></span></h2>
+                    <p>Выберите дни для работы, затем нажмите "Сохранить изменения"</p>
+                </div>
+                <button class="btn btn-outline btn-sm" id="logoutBtn">Выйти</button>
+            </div>
+            <div class="info-note" id="infoNote">
+                ⏰ Добавлять смены можно на 4 недели вперёд.<br>
+                🗑️ Удалить смену можно не позднее чем за 22 часа до её начала (10:00).
+            </div>
+            <div class="month-tabs" id="monthTabs"></div>
+            <div id="calendarContainer"></div>
+            <div class="save-bar">
+                <button class="btn save-button" id="saveBtn">💾 Сохранить изменения</button>
+            </div>
+        </div>
+    </div>
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // ------------------- Конфигурация -------------------
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycbzARchy2ENYbv4KzOHU8T08gDJheq81cCcYhep7_MS17U0PT7_eKuPeXt3BbVwqshda/exec-'; // замените на свой URL
+        const MONTHS_RU = ['апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь'];
+        const MONTH_DAYS = [30, 31, 30, 31, 31, 30];
+        let currentUser = null;
+        let currentAvailability = null; // { month: [ {day, type, startTime, endTime, addedAt} ] }
+        let pendingChanges = []; // массив изменений: { month, day, type, startTime, endTime, action }
+        let activeMonth = 0;
+
+        // ------------------- Вспомогательные функции -------------------
+        async function sha256(message) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(message);
+            const hash = await crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.backgroundColor = isError ? '#dc2626' : '#1e293b';
+            toast.style.opacity = '1';
+            setTimeout(() => toast.style.opacity = '0', 3000);
+        }
+
+        function setLoading(button, isLoading) {
+            if (isLoading) {
+                button.disabled = true;
+                const originalText = button.textContent;
+                button.dataset.originalText = originalText;
+                button.innerHTML = '<span class="loader"></span> Загрузка...';
+            } else {
+                button.disabled = false;
+                button.innerHTML = button.dataset.originalText || button.textContent;
+            }
+        }
+
+        async function callGAS(action, data = {}) {
+            const formData = new URLSearchParams();
+            formData.append('action', action);
+            for (let [k, v] of Object.entries(data)) {
+                formData.append(k, v);
+            }
+            try {
+                const resp = await fetch(GAS_URL, { method: 'POST', body: formData });
+                return await resp.json();
+            } catch (err) {
+                console.error(err);
+                showToast('Ошибка сети: ' + err.message, true);
+                return { success: false, message: 'Сетевая ошибка' };
+            }
+        }
+
+        // Проверка, можно ли добавить смену на дату (в пределах 4 недель)
+        function canAddShift(dateObj) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const maxDate = new Date(today);
+            maxDate.setDate(today.getDate() + 27);
+            return dateObj >= today && dateObj <= maxDate;
+        }
+
+        // Проверка, можно ли удалить смену (до начала менее 22 часов)
+        function canDeleteShift(shiftDateObj) {
+            const now = new Date();
+            const shiftStart = new Date(shiftDateObj);
+            shiftStart.setHours(10, 0, 0, 0);
+            const hoursLeft = (shiftStart - now) / (1000 * 3600);
+            return hoursLeft >= 22;
+        }
+
+        // Получить текущую смену для даты (с учётом ожидающих изменений)
+        function getCurrentShift(month, day) {
+            // сначала ищем в ожидающих изменениях
+            const pending = pendingChanges.find(c => c.month === month && c.day === day);
+            if (pending) {
+                if (pending.action === 'add') {
+                    return { type: pending.type, startTime: pending.startTime, endTime: pending.endTime, pending: true, action: 'add' };
+                } else if (pending.action === 'delete') {
+                    return { pending: true, action: 'delete' };
+                }
+            }
+            // иначе из текущей доступности
+            const original = currentAvailability?.[month]?.find(s => s.day === day);
+            return original ? { ...original, pending: false } : null;
+        }
+
+        // Генерация календаря для выбранного месяца
+        function renderMonthCalendar(monthIndex) {
+            const monthName = MONTHS_RU[monthIndex];
+            const daysInMonth = MONTH_DAYS[monthIndex];
+            const container = document.getElementById('calendarContainer');
+            if (!container) return;
+
+            const todayDate = new Date();
+            todayDate.setHours(0, 0, 0, 0);
+
+            let html = `<div class="calendar-grid">`;
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateObj = new Date(todayDate.getFullYear(), monthIndex, day);
+                const isPast = dateObj < todayDate;
+                const isToday = dateObj.toDateString() === todayDate.toDateString();
+                const shift = getCurrentShift(monthName, day);
+                const canAdd = canAddShift(dateObj) && !shift && !isPast;
+                const canDelete = shift && !isPast && canDeleteShift(dateObj);
+
+                let cardClass = 'day-card';
+                if (isPast) cardClass += ' past';
+                if (isToday) cardClass += ' today';
+                if (shift && shift.pending && shift.action === 'add') cardClass += ' pending-add';
+                else if (shift && shift.pending && shift.action === 'delete') cardClass += ' pending-delete';
+                else if (!isPast && !shift && canAdd) cardClass += ' free';
+                else if (shift && !shift.pending && !isPast) cardClass += ' occupied';
+                else if (!canAdd && !shift && !isPast) cardClass += ' disabled';
+
+                html += `<div class="${cardClass}" data-month="${monthName}" data-day="${day}" data-can-add="${canAdd}" data-can-delete="${canDelete}">
+                            <div class="day-number">${day}</div>`;
+                if (shift) {
+                    if (shift.pending && shift.action === 'delete') {
+                        html += `<div class="day-type">Будет удалена</div>`;
+                    } else {
+                        const typeText = shift.type === 'full' ? 'Полная' : 'Неполная';
+                        html += `<div class="day-type ${shift.type}">${typeText}</div>`;
+                        if (shift.type === 'part') {
+                            html += `<div class="day-time">${shift.startTime}–${shift.endTime === '00:00' ? '00:00' : shift.endTime}</div>`;
+                        }
+                    }
+                } else {
+                    html += `<div class="day-type">Свободно</div>`;
+                }
+                html += `</div>`;
+            }
+            html += `</div>`;
+            container.innerHTML = html;
+
+            // Добавляем обработчики кликов
+            document.querySelectorAll('.day-card').forEach(card => {
+                const month = card.dataset.month;
+                const day = parseInt(card.dataset.day);
+                const canAddFlag = card.dataset.canAdd === 'true';
+                const canDeleteFlag = card.dataset.canDelete === 'true';
+
+                card.addEventListener('click', async () => {
+                    if (card.classList.contains('past')) {
+                        showToast('Прошедшие дни нельзя изменять', true);
+                        return;
+                    }
+                    const currentShift = getCurrentShift(month, day);
+                    if (currentShift && !currentShift.pending) {
+                        // Если есть смена и нет ожидающих изменений, предлагаем удалить
+                        if (!canDeleteFlag) {
+                            showToast('Удаление невозможно: до смены менее 22 часов', true);
+                            return;
+                        }
+                        // Добавляем в pendingChanges на удаление
+                        pendingChanges.push({ month, day, action: 'delete' });
+                    } else if (currentShift && currentShift.pending && currentShift.action === 'delete') {
+                        // Отмена удаления
+                        pendingChanges = pendingChanges.filter(c => !(c.month === month && c.day === day));
+                    } else if (!currentShift) {
+                        // Добавление новой смены
+                        if (!canAddFlag) {
+                            if (!canAddShift(new Date(todayDate.getFullYear(), MONTHS_RU.indexOf(month), day))) {
+                                showToast('Добавление возможно только на ближайшие 4 недели', true);
+                            } else {
+                                showToast('На этот день уже есть смена', true);
+                            }
+                            return;
+                        }
+                        const dateObj = new Date(todayDate.getFullYear(), MONTHS_RU.indexOf(month), day);
+                        showAddShiftModal(month, day, dateObj);
+                    }
+                    renderMonthCalendar(activeMonth);
+                });
+            });
+        }
+
+        // Модалка добавления смены
+        function showAddShiftModal(month, day, dateObj) {
+            const modalDiv = document.createElement('div');
+            modalDiv.className = 'modal';
+            modalDiv.innerHTML = `
+                <div class="modal-content">
+                    <h3>Добавить смену на ${day} ${month}</h3>
+                    <label>Тип смены:</label>
+                    <select id="shiftType">
+                        <option value="full">Полная</option>
+                        <option value="part">Неполная</option>
+                    </select>
+                    <div id="timeFields" style="display:none;">
+                        <label>Начало (10:00 – 20:00):</label>
+                        <select id="startTime">
+                            ${generateTimeOptions(10, 20, 30)}
+                        </select>
+                        <label>Конец (12:00 – 22:00 или до конца):</label>
+                        <select id="endTime">
+                            ${generateTimeOptions(12, 22, 30)}
+                            <option value="00:00">До конца смены (00:00)</option>
+                        </select>
+                    </div>
+                    <div class="modal-buttons">
+                        <button class="btn btn-outline btn-sm" id="cancelModal">Отмена</button>
+                        <button class="btn btn-primary btn-sm" id="confirmAdd">Добавить</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modalDiv);
+
+            const typeSelect = modalDiv.querySelector('#shiftType');
+            const timeDiv = modalDiv.querySelector('#timeFields');
+            typeSelect.addEventListener('change', () => {
+                timeDiv.style.display = typeSelect.value === 'part' ? 'block' : 'none';
+            });
+
+            modalDiv.querySelector('#cancelModal').onclick = () => modalDiv.remove();
+            modalDiv.querySelector('#confirmAdd').onclick = () => {
+                const type = typeSelect.value;
+                let start = '', end = '';
+                if (type === 'part') {
+                    start = modalDiv.querySelector('#startTime').value;
+                    end = modalDiv.querySelector('#endTime').value;
+                    if (start >= end && end !== '00:00') {
+                        showToast('Время окончания должно быть позже начала', true);
+                        return;
+                    }
+                }
+                // Добавляем в pendingChanges
+                pendingChanges.push({ month, day, type, startTime: start, endTime: end, action: 'add' });
+                modalDiv.remove();
+                renderMonthCalendar(activeMonth);
+            };
+        }
+
+        function generateTimeOptions(startHour, endHour, stepMinutes = 30) {
+            let options = '';
+            for (let h = startHour; h <= endHour; h++) {
+                for (let m = 0; m < 60; m += stepMinutes) {
+                    if (h === endHour && m > 0) break;
+                    const time = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+                    options += `<option value="${time}">${time}</option>`;
+                }
+            }
+            return options;
+        }
+
+        // Сохранение всех изменений
+        async function saveChanges() {
+            if (pendingChanges.length === 0) {
+                showToast('Нет изменений для сохранения');
+                return;
+            }
+            const saveBtn = document.getElementById('saveBtn');
+            setLoading(saveBtn, true);
+            const result = await callGAS('batchUpdate', {
+                employeeId: currentUser.id,
+                changes: JSON.stringify(pendingChanges)
+            });
+            setLoading(saveBtn, false);
+            if (result.success) {
+                // Обновляем текущую доступность
+                currentAvailability = result.finalAvailability;
+                pendingChanges = [];
+                renderMonthCalendar(activeMonth);
+                showToast('Изменения успешно сохранены');
+            } else {
+                let errorMsg = result.message;
+                if (result.errors && result.errors.length) {
+                    errorMsg += '. Ошибки: ' + result.errors.map(e => `${e.day} ${e.month}: ${e.error}`).join('; ');
+                }
+                showToast(errorMsg, true);
+            }
+        }
+
+        // Переключение месяца
+        function switchMonth(index) {
+            activeMonth = index;
+            document.querySelectorAll('.month-tab').forEach((tab, i) => {
+                if (i === index) tab.classList.add('active');
+                else tab.classList.remove('active');
+            });
+            renderMonthCalendar(activeMonth);
+        }
+
+        // Создание вкладок месяцев
+        function renderMonthTabs() {
+            const container = document.getElementById('monthTabs');
+            if (!container) return;
+            container.innerHTML = '';
+            MONTHS_RU.forEach((month, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'month-tab' + (idx === activeMonth ? ' active' : '');
+                btn.textContent = month.charAt(0).toUpperCase() + month.slice(1);
+                btn.addEventListener('click', () => switchMonth(idx));
+                container.appendChild(btn);
+            });
+        }
+
+        // Логин
+        async function login() {
+            const empId = document.getElementById('empId').value.trim();
+            const pass = document.getElementById('password').value;
+            if (!empId || !pass) {
+                showToast('Введите ID и пароль', true);
+                return;
+            }
+            const loginBtn = document.getElementById('loginBtn');
+            setLoading(loginBtn, true);
+            const hash = await sha256(pass);
+            const res = await callGAS('login', { employeeId: empId, passwordHash: hash });
+            setLoading(loginBtn, false);
+            if (res.success) {
+                currentUser = res.employee;
+                currentAvailability = res.availability;
+                document.getElementById('userName').innerText = currentUser.name;
+                document.getElementById('loginPage').classList.add('hidden');
+                document.getElementById('dashboardPage').classList.remove('hidden');
+                renderMonthTabs();
+                // Определяем текущий месяц для активной вкладки
+                const currentMonth = new Date().getMonth();
+                let activeMonthIdx = MONTHS_RU.findIndex(m => m === MONTHS_RU[currentMonth]);
+                if (activeMonthIdx === -1) activeMonthIdx = 0;
+                activeMonth = activeMonthIdx;
+                switchMonth(activeMonth);
+                showToast(`Добро пожаловать, ${currentUser.name}`);
+            } else {
+                showToast(res.message, true);
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            currentAvailability = null;
+            pendingChanges = [];
+            document.getElementById('dashboardPage').classList.add('hidden');
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('password').value = '';
+            activeMonth = 0;
+        }
+
+        // Показать/скрыть пароль
+        document.getElementById('togglePassword').addEventListener('click', () => {
+            const passField = document.getElementById('password');
+            if (passField.type === 'password') {
+                passField.type = 'text';
+                document.getElementById('togglePassword').textContent = '🙈';
+            } else {
+                passField.type = 'password';
+                document.getElementById('togglePassword').textContent = '👁️';
+            }
+        });
+
+        // Инициализация
+        document.getElementById('loginBtn').addEventListener('click', login);
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+        document.getElementById('saveBtn').addEventListener('click', saveChanges);
+        document.getElementById('password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') login();
+        });
+    </script>
+</body>
+</html>
