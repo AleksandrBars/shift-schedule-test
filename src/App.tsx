@@ -10,9 +10,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
       setProfile(null);
@@ -20,17 +18,37 @@ export default function App() {
       return;
     }
 
-    // Ищем сотрудника по auth_uid (связь с таблицей auth.users)
-    const { data, error } = await supabase
+    // 1. Ищем в employees
+    let { data: empData, error: empError } = await supabase
       .from('employees')
       .select('id, full_name, age, access_level')
-      .eq('auth_uid', user.id)   // ← заменили email на auth_uid
+      .eq('auth_uid', user.id)
       .single();
 
-    if (data) {
-      setProfile(data as UserProfile);
+    if (empData) {
+      setProfile(empData as UserProfile);
+      setLoading(false);
+      return;
+    }
+
+    // 2. Если нет — ищем в admins
+    const { data: adminData, error: adminError } = await supabase
+      .from('admins')
+      .select('id, full_name, access_level')
+      .eq('auth_uid', user.id)
+      .single();
+
+    if (adminData) {
+      // Преобразуем в формат UserProfile
+      const profileFromAdmin: UserProfile = {
+        id: adminData.id,
+        full_name: adminData.full_name,
+        age: null,          // у админов может не быть возраста
+        access_level: adminData.access_level,
+      };
+      setProfile(profileFromAdmin);
     } else {
-      console.error('Profile fetch error:', error);
+      console.error('Profile not found in employees or admins');
       setProfile(null);
     }
     setLoading(false);
